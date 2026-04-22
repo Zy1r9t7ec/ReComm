@@ -1,0 +1,48 @@
+{
+  "cities": [
+    {
+      "city": "Hyderabad",
+      "hubs": [
+        { "hub_id": "HYD-01", "type": "dark_store",     "pincode": "500032", "capacity": 200, "lat": 17.385, "lng": 78.486 },
+        { "hub_id": "HYD-02", "type": "resale_partner", "pincode": "500016", "capacity": 150, "lat": 17.361, "lng": 78.474 },
+        { "hub_id": "HYD-03", "type": "refurb_centre",  "pincode": "500072", "capacity": 100, "lat": 17.433, "lng": 78.448 },
+        { "hub_id": "HYD-04", "type": "service_centre", "pincode": "500003", "capacity":  80, "lat": 17.395, "lng": 78.474 }
+      ]
+    },
+    {
+      "city": "Mumbai",
+      "hubs": [
+        { "hub_id": "BOM-01", "type": "dark_store",     "pincode": "400051", "capacity": 300, "lat": 19.018, "lng": 72.849 },
+        { "hub_id": "BOM-02", "type": "resale_partner", "pincode": "400016", "capacity": 200, "lat": 19.040, "lng": 72.839 },
+        { "hub_id": "BOM-03", "type": "refurb_centre",  "pincode": "400063", "capacity": 120, "lat": 19.187, "lng": 72.848 },
+        { "hub_id": "BOM-04", "type": "service_centre", "pincode": "400093", "capacity":  90, "lat": 19.218, "lng": 72.978 }
+      ]
+    },
+    {
+      "city": "Delhi",
+      "hubs": [
+        { "hub_id": "DEL-01", "type": "dark_store",     "pincode": "110001", "capacity": 250, "lat": 28.631, "lng": 77.219 },
+        { "hub_id": "DEL-02", "type": "resale_partner", "pincode": "110020", "capacity": 180, "lat": 28.543, "lng": 77.206 },
+        { "hub_id": "DEL-03", "type": "refurb_centre",  "pincode": "110092", "capacity": 100, "lat": 28.669, "lng": 77.293 },
+        { "hub_id": "DEL-04", "type": "service_centre", "pincode": "110030", "capacity":  75, "lat": 28.520, "lng": 77.158 }
+      ]
+    },
+    {
+      "city": "Bangalore",
+      "hubs": [
+        { "hub_id": "BLR-01", "type": "dark_store",     "pincode": "560001", "capacity": 220, "lat": 12.975, "lng": 77.608 },
+        { "hub_id": "BLR-02", "type": "resale_partner", "pincode": "560038", "capacity": 160, "lat": 12.935, "lng": 77.624 },
+        { "hub_id": "BLR-03", "type": "refurb_centre",  "pincode": "560043", "capacity": 110, "lat": 12.849, "lng": 77.661 },
+        { "hub_id": "BLR-04", "type": "service_centre", "pincode": "560102", "capacity":  70, "lat": 12.908, "lng": 77.648 }
+      ]
+    },
+    {
+      "city": "Chennai",
+      "hubs": [
+        { "hub_id": "CHE-01", "type": "dark_store",     "pincode": "600017", "capacity": 180, "lat": 13.085, "lng": 80.210 },
+        { "hub_id": "CHE-02", "type": "resale_partner", "pincode": "600032", "capacity": 140, "lat": 13.042, "lng": 80.233 },
+        { "hub_id": "CHE-03", "type": "refurb_centre",  "pincode": "600097", "capacity":  90, "lat": 12.901, "lng": 80.228 }
+      ]
+    }
+  ]
+}

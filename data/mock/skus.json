@@ -1,0 +1,17 @@
+{
+  "skus": [
+    {
+      "sku_id": "PB-200",
+      "name": "Portronics Powerbank PB-200",
+      "brand": "Portronics",
+      "category": "Electronics",
+      "weight_kg": 0.22,
+      "known_defects": [
+        { "defect_code": "USB_PORT_LOOSE", "description": "USB-C port becomes loose after 3-6 months", "is_manufacturer_fault": true }
+      ],
+      "troubleshooter_steps": [
+        { "reason": "not_charging", "step": "Hold the power button for 8 seconds to reset the battery controller.", "resolution_rate": 0.74 }
+      ]
+    }
+  ]
+}
