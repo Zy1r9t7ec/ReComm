@@ -1,7 +1,8 @@
 from fastapi import APIRouter, BackgroundTasks
 from models.returns import InitiateReturnRequest, InitiateReturnResponse, TroubleshooterRequest, TroubleshooterResponse
 from services.troubleshooter import get_troubleshooter_step
-from agents.orchestrator import execute_return_orchestration
+from agents.inspection import InspectionAgent
+from agents.state import ReturnContext as SDKReturnContext
 import uuid
 
 router = APIRouter(
@@ -56,12 +57,25 @@ def start_inspection(return_id: str, background_tasks: BackgroundTasks):
         
     def async_orchestrator(rid):
         context = MOCK_RETURN_CONTEXT[rid]
-        # In actual deployment, this mutates Firestore
-        updated_context = execute_return_orchestration(context)
-        MOCK_RETURN_CONTEXT[rid] = updated_context
+        
+        # Hydrate the raw dictionary into ADK Stateful object
+        state = SDKReturnContext(
+            return_id=context["return_id"],
+            customer_id=context.get("customer_id", "CUST-000"),
+            order_id=context.get("order_id", "ORD-000"),
+            sku_id=context.get("sku_id", "UNKNOWN"),
+            return_reason_code=context.get("return_reason_code", "UNKNOWN"),
+            video_uri=context.get("video_uri", f"gs://mock/{rid}.mp4")
+        )
+        
+        # Fire first node in the A2A Domino Chain
+        finished_state = InspectionAgent().process(state)
+        
+        # Deflate ADK object back to FastAPI session
+        MOCK_RETURN_CONTEXT[rid] = finished_state.model_dump()
         
     background_tasks.add_task(async_orchestrator, return_id)
-    return {"status": "Inspection Orchestration Started", "return_id": return_id}
+    return {"status": "A2A Agentic Chain Started", "return_id": return_id}
 
 @router.get("/{return_id}")
 def get_return_context(return_id: str):
