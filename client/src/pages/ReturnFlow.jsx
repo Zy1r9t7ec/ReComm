@@ -201,7 +201,7 @@ export default function ReturnFlow() {
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', justifyContent: 'center' }}>
             <div style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', background: '#333' }}>
-              <img src="https://m.media-amazon.com/images/I/41Dq74X9yQL._SX300_SY300_QL70_FMwebp_.jpg" alt="thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=200&auto=format&fit=crop&q=60" alt="thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <h2 style={{ margin: 0 }}>Portronics Recommended Fix</h2>
           </div>

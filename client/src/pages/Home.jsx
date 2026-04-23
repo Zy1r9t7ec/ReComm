@@ -41,7 +41,7 @@ export default function Home() {
         
         <div className="product-snippet" style={{background: 'rgba(255,255,255,0.02)', padding: '1.25rem'}}>
           <div className="product-img" style={{background: 'transparent', width: '70px', height: '70px'}}>
-            <img src="https://m.media-amazon.com/images/I/41Dq74X9yQL._SX300_SY300_QL70_FMwebp_.jpg" alt="Portronics PB-200" style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)'}} />
+            <img src="https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=500&auto=format&fit=crop&q=60" alt="Portronics PB-200" style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)'}} />
           </div>
           <div>
             <h3 style={{margin: 0, fontSize: '1.1rem', marginBottom: '0.25rem'}}>Portronics Powerbank PB-200</h3>

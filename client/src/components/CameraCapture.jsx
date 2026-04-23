@@ -1,9 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, StopCircle, RefreshCcw, AlertTriangle } from 'lucide-react';
+import { Camera, StopCircle, RefreshCcw, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 
 export default function CameraCapture({ onComplete }) {
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
+  const fileInputRef = useRef(null);
+  
   const [isRecording, setIsRecording] = useState(false);
   const [isStreamReady, setIsStreamReady] = useState(false);
   const [timeLeft, setTimeLeft] = useState(90); // 90 seconds max
@@ -36,13 +38,22 @@ export default function CameraCapture({ onComplete }) {
       startQualityDetector(stream);
     } catch (err) {
       console.error("Camera error:", err);
-      alert("Unable to access camera. Please check permissions.");
+      // Fails silently for demo fallback - allows them to just click upload
     }
   };
 
   const stopCamera = () => {
     if (videoRef.current?.srcObject) {
       videoRef.current.srcObject.getTracks().forEach(t => t.stop());
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      stopCamera();
+      setIsRecording(false);
+      onComplete(file);
     }
   };
 
@@ -123,6 +134,13 @@ export default function CameraCapture({ onComplete }) {
     }
   };
 
+  const getGuideline = (secondsLeft) => {
+    if (secondsLeft > 75) return "Please show the front of the product clearly.";
+    if (secondsLeft > 60) return "Rotate to show the back and sides.";
+    if (secondsLeft > 45) return "Point closely at any visible damage or issues.";
+    return "State your exact reason for returning aloud.";
+  };
+
   return (
     <div className="glass-card animate-fade-in text-center" style={{ padding: '1rem' }}>
       <h3 style={{ margin: '0 0 1rem' }}>Product Inspection</h3>
@@ -131,6 +149,12 @@ export default function CameraCapture({ onComplete }) {
         <div style={{ background: 'var(--danger)', color: 'white', padding: '0.5rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
           <AlertTriangle size={16} /> {qualityWarning}
         </div>
+      )}
+
+      {isRecording && (
+         <div style={{background: 'rgba(59, 130, 246, 0.1)', padding: '0.75rem', borderRadius: 8, marginBottom: '1rem', border: '1px solid var(--primary)'}}>
+            <strong style={{color: 'white'}}>{getGuideline(timeLeft)}</strong>
+         </div>
       )}
 
       <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', background: '#0a0a0a', marginBottom: '1rem', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -157,14 +181,19 @@ export default function CameraCapture({ onComplete }) {
           </div>
         )}
       </div>
-      
-      {isRecording && <p style={{ fontSize: '0.9rem', color: 'var(--primary)' }}>Please state your reason for returning aloud.</p>}
 
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
         {!isRecording ? (
-          <button className="btn primary" onClick={startRecording} disabled={!isStreamReady}>
-            <Camera size={18} /> {isStreamReady ? 'Start Recording' : 'Waiting for Camera'}
-          </button>
+          <>
+            <button className="btn primary" onClick={startRecording} disabled={!isStreamReady}>
+              <Camera size={18} /> {isStreamReady ? 'Start Recording' : 'Waiting...'}
+            </button>
+            
+            <button className="btn" onClick={() => fileInputRef.current.click()} style={{background: 'rgba(255,255,255,0.05)'}}>
+              <ImageIcon size={18} /> From Gallery
+            </button>
+            <input type="file" accept="image/*,video/*" ref={fileInputRef} onChange={handleFileUpload} style={{display: 'none'}} />
+          </>
         ) : (
           <button className="btn danger-outline" onClick={stopRecording} style={{ background: 'var(--danger)', color: 'white' }}>
             <StopCircle size={18} /> Stop & Submit Match
