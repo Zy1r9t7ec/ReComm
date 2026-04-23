@@ -175,7 +175,8 @@ The condition grade is the central data point that flows through Stages 3, 4, an
 | Camera API | `getUserMedia` (web) or native camera API |
 | Video constraints | Max 90s, encode to H.264/MP4 before upload |
 | Real-time quality check | Client-side frame analysis every 500ms during recording |
-| Upload | Chunked upload with progress indicator and retry logic |
+| Upload | Resumable chunked upload via GCS XML API Multipart. Signed URLs enforce a strict 15-minute TTL. |
+| Agent Trigger | GCS Pub/Sub trigger (`ObjectFinalize`) fires Cloud Tasks immediately upon upload completion. No client-side polling required. |
 | Offline handling | Video persisted to **IndexedDB** on upload failure; background sync retries automatically on reconnection. Blob stored with `return_id` key so it survives tab refresh. |
 | Push notifications | **Firebase Cloud Messaging (FCM)** — device token collected at return initiation; verdict notification pushed when inspection completes, even if customer has closed the tab. |
 | Accessibility | Fallback to photo + voice note if camera unavailable |

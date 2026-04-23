@@ -487,11 +487,11 @@ FraudAgent                        (waits for InspectionAgent)
 | All vision + audio analysis tools | **Gemma 4** via Google AI Studio API |
 | Agent session state (`ReturnContext`) | **Firestore** document (real-time, survives tab close) |
 | Merchant dashboard real-time updates | **Firestore listeners** on `/merchants/{id}/returns` |
-| Async task queue (agent invocation) | **Cloud Tasks** or **Pub/Sub** |
+| Async task queue (agent invocation) | **Cloud Tasks** (triggered via GCS Pub/Sub `ObjectFinalize` event) |
 | Offline video buffer (client) | **IndexedDB** |
 | Push notifications | **Firebase Cloud Messaging (FCM)** |
 | Hub distance cache | **Redis** (Cloud Memorystore) |
-| Video storage | **Google Cloud Storage** (private bucket, signed URLs, 90-day TTL) |
+| Video storage | **Google Cloud Storage** (private bucket, XML multipart resumable uploads, 15-min signed URL TTL, 90-day deletion TTL) |
 | Training data store | **BigQuery** table — append-only, one row per `ReturnContext` |
 
 ---
