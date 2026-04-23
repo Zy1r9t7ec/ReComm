@@ -200,8 +200,8 @@ export default function ReturnFlow() {
           <div className="product-snippet" style={{ flexDirection: 'column', alignItems: 'center', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid var(--primary)', padding: '1.5rem', textAlign: 'center' }}>
             <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'white' }}>{localTroubleshooter?.step}</h3>
             {localTroubleshooter?.resolution_rate && (
-              <span className="badge" style={{ marginTop: '1rem' }}>
-                💡 Resolved the issue for {Math.round(localTroubleshooter.resolution_rate * 100)}% of customers!
+              <span className="badge" style={{ marginTop: '1rem', display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                <Zap size={14} fill="currentColor" /> Resolved the issue for {Math.round(localTroubleshooter.resolution_rate * 100)}% of customers!
               </span>
             )}
           </div>

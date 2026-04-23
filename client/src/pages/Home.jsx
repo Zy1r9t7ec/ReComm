@@ -22,7 +22,7 @@ export default function Home() {
       {/* Brand Header */}
       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem'}}>
         <div>
-          <h1 style={{margin: 0, fontSize: '1.5rem', color: 'var(--text)'}}>Hi, Priya 👋</h1>
+          <h1 style={{margin: 0, fontSize: '1.5rem', color: 'var(--text)'}}>Welcome, Priya</h1>
           <p style={{margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)'}}>Manage your recent orders</p>
         </div>
         <div style={{width: '45px', height: '45px', borderRadius: '50%', background: 'rgba(139, 92, 246, 0.2)', border: '2px solid var(--primary)', overflow: 'hidden'}}>
