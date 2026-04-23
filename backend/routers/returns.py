@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 from models.returns import InitiateReturnRequest, InitiateReturnResponse, TroubleshooterRequest, TroubleshooterResponse
 from services.troubleshooter import get_troubleshooter_step
+from agents.orchestrator import execute_return_orchestration
 import uuid
 
 router = APIRouter(
@@ -43,6 +44,24 @@ def resolve_troubleshooter(return_id: str, request: TroubleshooterRequest):
         return TroubleshooterResponse(next_step="closed")
     else:
         return TroubleshooterResponse(next_step="recording")
+
+@router.post("/{return_id}/inspect")
+def start_inspection(return_id: str, background_tasks: BackgroundTasks):
+    """
+    Simulates the Cloud Tasks / PubSub hook where the media upload completion
+    triggers the multi-modal agent orchestrator asynchronously.
+    """
+    if return_id not in MOCK_RETURN_CONTEXT:
+        return {"error": "Return session not found."}
+        
+    def async_orchestrator(rid):
+        context = MOCK_RETURN_CONTEXT[rid]
+        # In actual deployment, this mutates Firestore
+        updated_context = execute_return_orchestration(context)
+        MOCK_RETURN_CONTEXT[rid] = updated_context
+        
+    background_tasks.add_task(async_orchestrator, return_id)
+    return {"status": "Inspection Orchestration Started", "return_id": return_id}
 
 @router.get("/{return_id}")
 def get_return_context(return_id: str):
