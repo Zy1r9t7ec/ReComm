@@ -41,6 +41,12 @@ export const api = {
         // Start first chunk
         setTimeout(sendChunk, 1000);
       });
+    },
+    startInspection: async (returnId) => {
+      const res = await fetch(`${API_BASE}/returns/${returnId}/inspect`, {
+        method: 'POST'
+      });
+      return res.json();
     }
   }
 };

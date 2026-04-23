@@ -105,6 +105,10 @@ export default function ReturnFlow() {
       try {
         await api.returns.uploadMedia(returnContext.return_id, blob, setUploadProgress);
         await clearOfflineVideo(returnContext.return_id);
+        
+        // Trigger the backend A2A Autonomous Agents Pipeline asynchronously
+        await api.returns.startInspection(returnContext.return_id);
+        
         setStep('INSPECTION');
       } catch (e) {
         // Fallback: Save to IndexedDB if network fails

@@ -5,6 +5,7 @@ export default function CameraCapture({ onComplete }) {
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [isStreamReady, setIsStreamReady] = useState(false);
   const [timeLeft, setTimeLeft] = useState(90); // 90 seconds max
   const [qualityWarning, setQualityWarning] = useState(null);
   
@@ -28,6 +29,9 @@ export default function CameraCapture({ onComplete }) {
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => {
+          setIsStreamReady(true);
+        };
       }
       startQualityDetector(stream);
     } catch (err) {
@@ -129,13 +133,21 @@ export default function CameraCapture({ onComplete }) {
         </div>
       )}
 
-      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', background: '#000', marginBottom: '1rem' }}>
+      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '8px', background: '#0a0a0a', marginBottom: '1rem', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        
+        {!isStreamReady && (
+          <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid var(--border)', borderTopColor: 'var(--primary)', animation: 'spin 1s linear infinite' }} />
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Initializing Lens...</p>
+          </div>
+        )}
+        
         <video 
           ref={videoRef} 
           autoPlay 
           playsInline 
           muted 
-          style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', transform: 'scaleX(-1)' }} 
+          style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', transform: 'scaleX(-1)', opacity: isStreamReady ? 1 : 0, transition: 'opacity 0.5s' }} 
         />
         
         {isRecording && (
@@ -150,8 +162,8 @@ export default function CameraCapture({ onComplete }) {
 
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
         {!isRecording ? (
-          <button className="btn primary" onClick={startRecording}>
-            <Camera size={18} /> Start Recording
+          <button className="btn primary" onClick={startRecording} disabled={!isStreamReady}>
+            <Camera size={18} /> {isStreamReady ? 'Start Recording' : 'Waiting for Camera'}
           </button>
         ) : (
           <button className="btn danger-outline" onClick={stopRecording} style={{ background: 'var(--danger)', color: 'white' }}>
@@ -161,4 +173,11 @@ export default function CameraCapture({ onComplete }) {
       </div>
     </div>
   );
+}
+
+// Add global spin animation logic implicitly relying on bundler
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.innerHTML = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+  document.head.appendChild(style);
 }

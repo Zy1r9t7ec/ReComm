@@ -46,8 +46,8 @@ export default function ReviewQueue() {
                 <td>{c.sku_id}</td>
                 <td><span className={`badge grade-${c.condition_grade || 'Pending'}`}>{c.condition_grade || 'Pending'}</span></td>
                 <td>
-                  <span style={{color: c.fraud_score > 0.5 ? 'var(--danger)' : 'inherit'}}>
-                    {c.fraud_score !== null ? `${(c.fraud_score * 100).toFixed(0)}%` : '--'}
+                  <span style={{color: (c.fraud_score ?? 0) > 0.5 ? 'var(--danger)' : 'inherit'}}>
+                    {c.fraud_score != null ? `${(c.fraud_score * 100).toFixed(0)}%` : '--'}
                   </span>
                 </td>
                 <td style={{fontWeight: c.requires_manual_review ? 'bold' : 'normal', color: c.requires_manual_review ? 'var(--danger)' : 'white'}}>{c.final_outcome || 'Pending'}</td>

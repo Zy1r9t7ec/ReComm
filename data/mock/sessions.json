@@ -1,0 +1,56 @@
+{
+    "RTN-6675B544": {
+        "return_id": "RTN-6675B544",
+        "customer_id": "CUST-00123",
+        "order_id": "ORD-99921",
+        "sku_id": "PB-200",
+        "return_reason_code": "not_charging",
+        "pre_return_resolved": false,
+        "final_outcome": "Approved",
+        "human_override_notes": "Rejecting due to clear damage not reported.",
+        "requires_manual_review": false
+    },
+    "RTN-99DE8619": {
+        "return_id": "RTN-99DE8619",
+        "customer_id": "CUST-00123",
+        "order_id": "ORD-99921",
+        "sku_id": "PB-200",
+        "return_reason_code": "damaged",
+        "pre_return_resolved": false
+    },
+    "RTN-79BE703E": {
+        "return_id": "RTN-79BE703E",
+        "customer_id": "CUST-00123",
+        "order_id": "ORD-99921",
+        "sku_id": "PB-200",
+        "return_reason_code": "defective",
+        "pre_return_resolved": false
+    },
+    "RTN-49FF5A25": {
+        "return_id": "RTN-49FF5A25",
+        "customer_id": "CUST-00123",
+        "order_id": "ORD-99921",
+        "sku_id": "PB-200",
+        "return_reason_code": "not_charging",
+        "pre_return_resolved": false
+    },
+    "RTN-5036609F": {
+        "return_id": "RTN-5036609F",
+        "customer_id": "CUST-00123",
+        "order_id": "ORD-99921",
+        "sku_id": "PB-200",
+        "return_reason_code": "not_charging",
+        "video_uri": "gs://mock/RTN-5036609F.mp4",
+        "condition_grade": "B",
+        "inspection_reasoning": "Chassis presents microscopic scuffing upon zooming in frame 4.",
+        "resellable": true,
+        "policy_flag": "Standard Electronics Condition Approved.",
+        "fraud_score": null,
+        "requires_manual_review": false,
+        "routed_hub_id": "DEL-03",
+        "route_type": "refurb_centre",
+        "carbon_offset_kg": 0.025,
+        "final_outcome": "Approved",
+        "customer_message": "Your return has been approved instantly! Because of system logic: [Standard Electronics Condition Approved.], your electronics will be routed for refurbishment, helping promote a circular economy."
+    }
+}
