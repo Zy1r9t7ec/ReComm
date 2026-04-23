@@ -32,7 +32,7 @@ export default function CameraCapture({ onComplete, productData }) {
   const [scanStatus, setScanStatus] = useState("Awaiting Start");
   
   const chunksRef = useRef([]);
-  let qualityInterval;
+  const qualityIntervalRef = useRef(null);
   
   // Track mutating states for the setInterval engine
   const engineRef = useRef({
@@ -50,10 +50,12 @@ export default function CameraCapture({ onComplete, productData }) {
   }, [isRecording]);
 
   useEffect(() => {
+    let active = true;
     startCamera();
     return () => {
+      active = false;
       stopCamera();
-      clearInterval(qualityInterval);
+      if (qualityIntervalRef.current) clearInterval(qualityIntervalRef.current);
     };
   }, []);
 
@@ -94,7 +96,8 @@ export default function CameraCapture({ onComplete, productData }) {
     canvas.height = 100;
     const ctx = canvas.getContext('2d');
 
-    qualityInterval = setInterval(() => {
+    if (qualityIntervalRef.current) clearInterval(qualityIntervalRef.current);
+    qualityIntervalRef.current = setInterval(() => {
       if (!videoRef.current) return;
       ctx.drawImage(videoRef.current, 0, 0, 100, 100);
       const imgData = ctx.getImageData(0, 0, 100, 100).data;
