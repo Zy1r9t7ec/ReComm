@@ -164,7 +164,18 @@ export default function ReturnFlow() {
     );
   }
 
-  if (step === 'OFFLINE_SAVED') { ... } // Reusing below
+  if (step === 'OFFLINE_SAVED') {
+    return (
+      <div className="container animate-fade-in text-center" style={{ paddingTop: '4rem' }}>
+        <div className="glass-card">
+          <RefreshCcw size={48} className="mb-4 text-danger" />
+          <h2>Offline Mode Enabled</h2>
+          <p>Connection lost. Evidence safely stored locally.</p>
+          <button className="btn primary mt-4" onClick={() => setStep('UPLOADING')}>Retry Upload</button>
+        </div>
+      </div>
+    );
+  }
 
   if (step === 'INSPECTION') {
     return (
