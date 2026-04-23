@@ -22,15 +22,24 @@ export const api = {
       // Mock chunked upload to GCS signed URL to respect prototype constraints
       return new Promise((resolve, reject) => {
         let progress = 0;
-        const interval = setInterval(() => {
-          progress += 20;
+        
+        const sendChunk = () => {
+          // Jitter between 1.5s - 4.0s representing slow mobile bandwidth
+          const jitterDelay = Math.random() * 2500 + 1500; 
+          progress += Math.floor(Math.random() * 15) + 10; // Advancing 10-25%
+          if (progress > 100) progress = 100;
+          
           if (onProgress) onProgress(progress);
+          
           if (progress >= 100) {
-            clearInterval(interval);
-            // Inject random failure occasionally or resolve based on env 
             resolve({ status: 'success', upload_id: 'up_' + Date.now() });
+          } else {
+            setTimeout(sendChunk, jitterDelay);
           }
-        }, 500); // Simulated 2.5sec upload time total
+        };
+        
+        // Start first chunk
+        setTimeout(sendChunk, 1000);
       });
     }
   }

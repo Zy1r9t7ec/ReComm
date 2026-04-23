@@ -59,10 +59,10 @@ export default function CameraCapture({ onComplete }) {
       }
       const brightness = sum / (imgData.length / 4);
 
-      if (brightness < 40) {
+      if (brightness < 20) {
         darknessCount++;
         if (darknessCount > 3) setQualityWarning("The area is too dark. Please move to a brighter place.");
-      } else if (brightness > 240) {
+      } else if (brightness > 250) {
         darknessCount = 0;
         setQualityWarning("The lighting is too harsh or overexposed. Adjust your position.");
       } else {

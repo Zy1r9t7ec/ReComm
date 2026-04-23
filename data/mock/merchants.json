@@ -1,0 +1,5 @@
+{
+    "MCH-01": {
+        "fraud_escalation_threshold": 0.6
+    }
+}

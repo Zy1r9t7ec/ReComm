@@ -1,5 +1,5 @@
 from .state import ReturnContext
-from .fraud import FraudAgent
+from .routing import RoutingAgent
 
 class PolicyAgent:
     """
@@ -21,7 +21,7 @@ class PolicyAgent:
         state.resellable = is_resellable
         state.policy_flag = flag
         
-        print(f"[A2A] PolicyAgent -> Handoff to FraudAgent")
+        print(f"[A2A] PolicyAgent -> Handoff to RoutingAgent")
         
         # A2A Direct Event Hook
-        return FraudAgent().process(state)
+        return RoutingAgent().process(state)

@@ -1,5 +1,5 @@
 from .state import ReturnContext
-from .policy import PolicyAgent
+from .fraud import FraudAgent
 
 class InspectionAgent:
     """
@@ -16,7 +16,7 @@ class InspectionAgent:
         state.condition_grade = "B"
         state.inspection_reasoning = "Chassis presents microscopic scuffing upon zooming in frame 4."
         
-        print(f"[A2A] InspectionAgent -> Handoff to PolicyAgent")
+        print(f"[A2A] InspectionAgent -> Handoff to FraudAgent")
         
         # A2A Direct Event Hook
-        return PolicyAgent().process(state)
+        return FraudAgent().process(state)

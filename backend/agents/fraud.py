@@ -1,6 +1,8 @@
 from .state import ReturnContext
-from .routing import RoutingAgent
+from .policy import PolicyAgent
 from .communication import CommunicationAgent
+import json
+import os
 
 class FraudAgent:
     """
@@ -15,14 +17,23 @@ class FraudAgent:
         if state.condition_grade == "Scrap":
             score = 0.6
             
-        state.fraud_score = score
-        state.requires_manual_review = score > 0.8
+        threshold = 0.8
+        try:
+            mock_file = os.path.join(os.path.dirname(__file__), '../../data/mock/merchants.json')
+            with open(mock_file, 'r') as f:
+                data = json.load(f)
+                # Hardcoded MCH-01 for prototype test
+                threshold = data.get("MCH-01", {}).get("fraud_escalation_threshold", 0.8)
+        except Exception as e:
+            print(f"[A2A] FraudAgent config load error: {e}")
+            
+        state.requires_manual_review = score > threshold
         
         if state.requires_manual_review:
-            print(f"[A2A] FraudAgent -> ANOMALY DETECTED. Handoff to CommunicationAgent (Abort Route).")
+            print(f"[A2A] FraudAgent -> ANOMALY DETECTED (Score {score} > {threshold}). Handoff to CommunicationAgent (Abort Route).")
             state.final_outcome = "Manual Review"
             state.route_type = "Pending"
             return CommunicationAgent().process(state)
         
-        print(f"[A2A] FraudAgent -> Integrity check passed. Handoff to RoutingAgent.")
-        return RoutingAgent().process(state)
+        print(f"[A2A] FraudAgent -> Integrity check passed. Handoff to PolicyAgent.")
+        return PolicyAgent().process(state)
