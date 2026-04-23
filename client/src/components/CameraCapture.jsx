@@ -23,7 +23,12 @@ export default function CameraCapture({ onComplete, productData }) {
   const [isRecording, setIsRecording] = useState(false);
   const [isStreamReady, setIsStreamReady] = useState(false);
   const [qualityWarning, setQualityWarning] = useState(null);
-  
+
+  // 90-second recording cap (requirements.md §2)
+  const MAX_RECORDING_SECONDS = 90;
+  const [recordingSecondsLeft, setRecordingSecondsLeft] = useState(MAX_RECORDING_SECONDS);
+  const recordingTimerRef = useRef(null);
+
   // Simulated Vision States
   const category = productData?.category || 'default';
   const checklist = INSPECTION_PROFILES[category] || INSPECTION_PROFILES.default;
@@ -147,19 +152,28 @@ export default function CameraCapture({ onComplete, productData }) {
     }, 250);
   };
 
+  const stopRecordingAndSubmit = () => {
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
   const startRecording = () => {
     chunksRef.current = [];
+    setRecordingSecondsLeft(MAX_RECORDING_SECONDS);
     const stream = videoRef.current.srcObject;
-    const options = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus') 
-                    ? { mimeType: 'video/webm;codecs=vp8,opus' } 
-                    : { mimeType: 'video/mp4' };
-                    
+    const options = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+      ? { mimeType: 'video/webm;codecs=vp8,opus' }
+      : { mimeType: 'video/mp4' };
+
     try {
       mediaRecorderRef.current = new MediaRecorder(stream, options);
     } catch (e) {
       mediaRecorderRef.current = new MediaRecorder(stream);
     }
-    
+
     mediaRecorderRef.current.ondataavailable = e => {
       if (e.data.size > 0) chunksRef.current.push(e.data);
     };
@@ -172,14 +186,20 @@ export default function CameraCapture({ onComplete, productData }) {
 
     mediaRecorderRef.current.start(1000);
     setIsRecording(true);
+
+    // 90-second auto-stop timer
+    recordingTimerRef.current = setInterval(() => {
+      setRecordingSecondsLeft(prev => {
+        if (prev <= 1) {
+          stopRecordingAndSubmit();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-    }
-  };
+  const stopRecording = () => stopRecordingAndSubmit();
 
   const activeCheck = checklist[currentStep] || checklist[checklist.length - 1];
 
@@ -201,7 +221,9 @@ export default function CameraCapture({ onComplete, productData }) {
                <strong style={{color: currentStep >= checklist.length ? 'var(--success)' : 'white'}}>
                  {currentStep >= checklist.length ? "Verification Flow Complete" : activeCheck.label}
                </strong>
-               <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>{Math.min(currentStep + 1, checklist.length)} / {checklist.length}</span>
+               <span style={{fontSize: '0.8rem', color: recordingSecondsLeft <= 15 ? 'var(--danger)' : 'var(--text-muted)', fontWeight: recordingSecondsLeft <= 15 ? 700 : 400}}>
+                 {String(Math.floor(recordingSecondsLeft / 60)).padStart(2,'0')}:{String(recordingSecondsLeft % 60).padStart(2,'0')} left
+               </span>
             </div>
             
             <div style={{height: 6, background: '#222', borderRadius: 4, overflow: 'hidden', marginBottom: '0.5rem'}}>

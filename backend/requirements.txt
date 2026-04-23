@@ -2,7 +2,7 @@ fastapi
 uvicorn[standard]
 pydantic
 firebase-admin
-google-generativeai
+google-genai
 google-cloud-firestore
 google-cloud-storage
 google-cloud-bigquery
