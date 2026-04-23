@@ -95,5 +95,29 @@
         "sku_id": "PB-200",
         "return_reason_code": "not_charging",
         "pre_return_resolved": false
+    },
+    "RTN-C6D850A3": {
+        "return_id": "RTN-C6D850A3",
+        "customer_id": "CUST-00123",
+        "order_id": "ORD-99921",
+        "sku_id": "PB-200",
+        "return_reason_code": "damaged",
+        "pre_return_resolved": false
+    },
+    "RTN-FE5BAD87": {
+        "return_id": "RTN-FE5BAD87",
+        "customer_id": "CUST-00123",
+        "order_id": "ORD-99921",
+        "sku_id": "PB-200",
+        "return_reason_code": "not_charging",
+        "pre_return_resolved": false
+    },
+    "RTN-89E12D61": {
+        "return_id": "RTN-89E12D61",
+        "customer_id": "CUST-00123",
+        "order_id": "ORD-99921",
+        "sku_id": "PB-200",
+        "return_reason_code": "not_charging",
+        "pre_return_resolved": false
     }
 }
