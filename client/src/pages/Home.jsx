@@ -12,6 +12,7 @@ export default function Home() {
         sku_id: "PB-200", 
         brand: "Portronics",
         name: "Powerbank PB-200",
+        category: "electronics",
         customer_id: "CUST-00123" 
       } 
     });

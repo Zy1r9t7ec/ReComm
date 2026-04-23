@@ -144,7 +144,7 @@ export default function ReturnFlow() {
 
     return (
       <div className="container" style={{ paddingTop: '2rem' }}>
-        <CameraCapture onComplete={handleVideoComplete} />
+        <CameraCapture productData={productData} onComplete={handleVideoComplete} />
       </div>
     );
   }

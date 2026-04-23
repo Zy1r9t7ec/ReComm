@@ -1,19 +1,53 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, StopCircle, RefreshCcw, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import { Camera, StopCircle, RefreshCcw, AlertTriangle, Image as ImageIcon, Scan, CheckCircle2 } from 'lucide-react';
 
-export default function CameraCapture({ onComplete }) {
+const INSPECTION_PROFILES = {
+  electronics: [
+    { id: "front", label: "Scan device front & screen", durationReq: 3000 },
+    { id: "ports", label: "Scan charging ports & buttons", durationReq: 3000 },
+    { id: "serial", label: "Hold steady on Serial Number", durationReq: 2500 },
+    { id: "voice", label: "State exact issue out loud", durationReq: 2000 }
+  ],
+  default: [
+    { id: "front", label: "Show full product framing", durationReq: 3000 },
+    { id: "back", label: "Rotate 360 degrees to show back", durationReq: 3500 },
+    { id: "damage", label: "Point closely at visible damage", durationReq: 2500 }
+  ]
+};
+
+export default function CameraCapture({ onComplete, productData }) {
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const fileInputRef = useRef(null);
   
   const [isRecording, setIsRecording] = useState(false);
   const [isStreamReady, setIsStreamReady] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(90); // 90 seconds max
   const [qualityWarning, setQualityWarning] = useState(null);
+  
+  // Simulated Vision States
+  const category = productData?.category || 'default';
+  const checklist = INSPECTION_PROFILES[category] || INSPECTION_PROFILES.default;
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepProgress, setStepProgress] = useState(0);
+  const [scanStatus, setScanStatus] = useState("Awaiting Start");
   
   const chunksRef = useRef([]);
   let qualityInterval;
-  let darknessCount = 0;
+  
+  // Track mutating states for the setInterval engine
+  const engineRef = useRef({
+    recording: false,
+    step: 0,
+    progress: 0,
+    darknessCount: 0
+  });
+
+  useEffect(() => {
+    engineRef.current.recording = isRecording;
+    if (isRecording) {
+      setScanStatus("Scanning Bounding Box...");
+    }
+  }, [isRecording]);
 
   useEffect(() => {
     startCamera();
@@ -31,14 +65,11 @@ export default function CameraCapture({ onComplete }) {
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          setIsStreamReady(true);
-        };
+        videoRef.current.onloadedmetadata = () => setIsStreamReady(true);
       }
       startQualityDetector(stream);
     } catch (err) {
       console.error("Camera error:", err);
-      // Fails silently for demo fallback - allows them to just click upload
     }
   };
 
@@ -74,23 +105,48 @@ export default function CameraCapture({ onComplete }) {
       }
       const brightness = sum / (imgData.length / 4);
 
+      // Brightness Checks
+      let isClear = true;
       if (brightness < 15) {
-        darknessCount++;
-        if (darknessCount > 3) setQualityWarning("The area is extremely dark. Please ensure standard lighting.");
+        engineRef.current.darknessCount++;
+        isClear = false;
+        if (engineRef.current.darknessCount > 3) setQualityWarning("The area is too dark. Bounding Box lost.");
       } else if (brightness > 252) {
-        darknessCount = 0;
-        setQualityWarning("The lighting is blindingly overexposed. Adjust your position.");
+        engineRef.current.darknessCount = 0;
+        isClear = false;
+        setQualityWarning("Overexposed. Bounding Box lost.");
       } else {
-        darknessCount = 0;
+        engineRef.current.darknessCount = 0;
         setQualityWarning(null);
       }
-    }, 500);
+
+      // Vision Progress Engine
+      if (engineRef.current.recording && engineRef.current.step < checklist.length) {
+        if (isClear) {
+          const currentReq = checklist[engineRef.current.step].durationReq;
+          engineRef.current.progress += (250 / currentReq) * 100; // 250ms interval
+          setScanStatus("Scanning...");
+
+          if (engineRef.current.progress >= 100) {
+            engineRef.current.progress = 0;
+            engineRef.current.step += 1;
+            setCurrentStep(engineRef.current.step);
+            
+            if (engineRef.current.step >= checklist.length) {
+              setScanStatus("All Checks Verified!");
+            }
+          }
+          setStepProgress(engineRef.current.progress);
+        } else {
+          setScanStatus("Hold camera steady...");
+        }
+      }
+    }, 250);
   };
 
   const startRecording = () => {
     chunksRef.current = [];
     const stream = videoRef.current.srcObject;
-    // We try to encode in MP4 or WebM depending on browser support
     const options = MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus') 
                     ? { mimeType: 'video/webm;codecs=vp8,opus' } 
                     : { mimeType: 'video/mp4' };
@@ -113,18 +169,6 @@ export default function CameraCapture({ onComplete }) {
 
     mediaRecorderRef.current.start(1000);
     setIsRecording(true);
-    
-    // Start countdown
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          stopRecording();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
   };
 
   const stopRecording = () => {
@@ -134,16 +178,13 @@ export default function CameraCapture({ onComplete }) {
     }
   };
 
-  const getGuideline = (secondsLeft) => {
-    if (secondsLeft > 75) return "Please show the front of the product clearly.";
-    if (secondsLeft > 60) return "Rotate to show the back and sides.";
-    if (secondsLeft > 45) return "Point closely at any visible damage or issues.";
-    return "State your exact reason for returning aloud.";
-  };
+  const activeCheck = checklist[currentStep] || checklist[checklist.length - 1];
 
   return (
     <div className="glass-card animate-fade-in text-center" style={{ padding: '1rem' }}>
-      <h3 style={{ margin: '0 0 1rem' }}>Product Inspection</h3>
+      <h3 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+        <Scan size={20} color="var(--primary)" /> Smart Verification
+      </h3>
 
       {qualityWarning && (
         <div style={{ background: 'var(--danger)', color: 'white', padding: '0.5rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
@@ -152,8 +193,26 @@ export default function CameraCapture({ onComplete }) {
       )}
 
       {isRecording && (
-         <div style={{background: 'rgba(59, 130, 246, 0.1)', padding: '0.75rem', borderRadius: 8, marginBottom: '1rem', border: '1px solid var(--primary)'}}>
-            <strong style={{color: 'white'}}>{getGuideline(timeLeft)}</strong>
+         <div style={{background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: 8, marginBottom: '1rem', border: '1px solid var(--surface-border)'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem'}}>
+               <strong style={{color: currentStep >= checklist.length ? 'var(--success)' : 'white'}}>
+                 {currentStep >= checklist.length ? "Verification Flow Complete" : activeCheck.label}
+               </strong>
+               <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>{Math.min(currentStep + 1, checklist.length)} / {checklist.length}</span>
+            </div>
+            
+            <div style={{height: 6, background: '#222', borderRadius: 4, overflow: 'hidden', marginBottom: '0.5rem'}}>
+               <div style={{
+                 height: '100%', 
+                 width: `${currentStep >= checklist.length ? 100 : stepProgress}%`, 
+                 background: currentStep >= checklist.length ? 'var(--success)' : 'var(--primary)', 
+                 transition: 'width 0.25s linear'
+               }} />
+            </div>
+            <div style={{fontSize: '0.8rem', color: currentStep >= checklist.length ? 'var(--success)' : 'var(--text-muted)', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 4}}>
+               {currentStep >= checklist.length ? <CheckCircle2 size={12}/> : <Scan size={12}/>}
+               {scanStatus}
+            </div>
          </div>
       )}
 
@@ -174,11 +233,15 @@ export default function CameraCapture({ onComplete }) {
           style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', transform: 'scaleX(-1)', opacity: isStreamReady ? 1 : 0, transition: 'opacity 0.5s' }} 
         />
         
-        {isRecording && (
-          <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(239, 68, 68, 0.9)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'white', animation: 'fadeIn 1s infinite alternate' }} />
-            {timeLeft}s
-          </div>
+        {isRecording && currentStep < checklist.length && (
+           <div style={{
+              position: 'absolute', top: '10%', left: '10%', width: '80%', height: '80%', 
+              border: '2px dashed rgba(59, 130, 246, 0.5)', borderRadius: 16, pointerEvents: 'none'
+           }}>
+             <div style={{position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: 'var(--primary)', color: 'white', padding: '2px 8px', fontSize: '0.7rem', borderRadius: 4, fontWeight: 'bold'}}>
+                AI TARGET
+             </div>
+           </div>
         )}
       </div>
 
@@ -186,27 +249,19 @@ export default function CameraCapture({ onComplete }) {
         {!isRecording ? (
           <>
             <button className="btn primary" onClick={startRecording} disabled={!isStreamReady}>
-              <Camera size={18} /> {isStreamReady ? 'Start Recording' : 'Waiting...'}
+              <Camera size={18} /> {isStreamReady ? 'Start Smart Scan' : 'Waiting...'}
             </button>
-            
             <button className="btn" onClick={() => fileInputRef.current.click()} style={{background: 'rgba(255,255,255,0.05)'}}>
               <ImageIcon size={18} /> From Gallery
             </button>
             <input type="file" accept="image/*,video/*" ref={fileInputRef} onChange={handleFileUpload} style={{display: 'none'}} />
           </>
         ) : (
-          <button className="btn danger-outline" onClick={stopRecording} style={{ background: 'var(--danger)', color: 'white' }}>
-            <StopCircle size={18} /> Stop & Submit Match
+          <button className="btn danger-outline" onClick={stopRecording} style={{ background: currentStep >= checklist.length ? 'var(--success)' : 'var(--danger)', color: 'white', borderColor: 'transparent' }}>
+            <StopCircle size={18} /> {currentStep >= checklist.length ? 'Submit Final Recording' : 'Stop & Submit Match'}
           </button>
         )}
       </div>
     </div>
   );
-}
-
-// Add global spin animation logic implicitly relying on bundler
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.innerHTML = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
-  document.head.appendChild(style);
 }
